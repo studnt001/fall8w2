@@ -1,0 +1,11 @@
+APA format
+Papers should be in APAformat
+ Templates can be found here:
+	apastyle.apa.org
+		https://apastyle.apa.org/style-grammar-guidelines/paper-format/sample-papers
+	owl.purdue.org
+		https://owl.purdue.edu/owl/research_and_citation/apa_style/apa_formatting_and_style_guide/apa_sample_paper.html
+	overleaf.com
+		https://www.overleaf.com/latex/templates/template-and-sample-for-authoring-apa7-manuscripts/pvhtwcrvcmsp
+
+A citation manager is recommended: https://library.duke.edu/research/citing/tools-comparison

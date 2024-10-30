@@ -1,0 +1,9 @@
+The COMPAS system is an AI justice system used in the US which is described in these sources.
+
+Wired article: https://www.wired.com/2017/04/courts-using-ai-sentence-criminals-must-stop-now/
+CEPEJ report (from this conference): https://rm.coe.int/ethical-charter-en-for-publication-4-december-2018/16808f699c
+Palladium article: https://palladiummag.com/2019/03/29/machine-learning-in-the-judicial-system-is-mostly-just-hype/
+The Verge article: https://www.theverge.com/2020/6/24/21301465/ai-machine-learning-racist-crime-prediction-coalition-critical-technology-springer-study
+An article where the Cook County sentencing, disposition, and initiation data is analyzed: https://towardsdatascience.com/analyzing-chicago-court-data-with-python-8a4bae330dfd
+
+What are some problems with a system like COMPAS? If we were a data scientist (or similar role) on a team working on the COMPAS system, is there anything we can do to address these problems and make the system more equitable? Are these AI criminal justice products an overall positive addition to society or not?
