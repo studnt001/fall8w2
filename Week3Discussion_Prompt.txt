@@ -1,0 +1,9 @@
+For this discussion, you should post at least twice. 
+
+Twitter, Facebook, and other social media sites engage in forms of moderation/censorship regularly. A famous example is when both Twitter and Facebook banned Donald Trump from their platforms in January of 2021, but many other examples of censorship can be found on the platforms.
+
+What are your thoughts on this, and how is data science related to it? Is their censorship/moderation generally reprehensible, or responsible? What sort of data science tools could be used to aid in social media moderation, and how would it work? Should there be government intervention or regulations related to social media censorship? Are there some examples of social media bans that make sense, and others that don't?
+
+You don't have to answer all of the questions above - they are intended to get the discussion going.
+
+Bringing data or charts to support your argument is highly encouraged.
