@@ -1,6 +1,0 @@
-Should the final product look like an APA 7 academic paper or more like a letter.  Or is it a letter with a report attached?
-Any guidance on how much detail you want communicated on the technical process of data analytics or should it be more about the interpretation and implications of the analysis?
-I read the instructions that we should create at least 6 visuals with at least 3 being 'charts' and 3 being 'plots'.  I know these terms to be almost synonymous with plots being a kind of chart.  Are the charts meant to be more like tables?   
-It's truly a report to Kim Foxx, Cook County State's Attorney. If you were a data scientist working in your office and were asked to analyze the data, what would you say? What patterns are you seeing? What ethics issues maybe relevant and how they might be mitigated?
-You can include some technical details. But, remember this is real raw data and in the real world people (unless they are data scientists) are not interested in the technical aspects of what you did. They are interested in your analysis and what it means to their work. 
-Plots are referencing EDA plots where you are exploring the data and looking for trends. Charts are little bit more formal where you need to include the title, headings, labels etc. They could be more professional looking. 
