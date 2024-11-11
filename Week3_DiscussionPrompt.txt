@@ -1,7 +1,0 @@
-This week we will be discussing EDA techniques. After doing some internet research on the topic, discuss the following topics with your classmates.
-
-What is the lifecycle of a data science project and where does EDA fit within that cycle?
-
-What is the difference between univariate, bivariate, and multivariate analysis?
-
-Discuss the similarities and differences between categorical and continuous variables.
