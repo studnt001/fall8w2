@@ -1,0 +1,7 @@
+Please do some Internet research about the following topics and discuss them with your classmates.  
+
+When should you use classification over regression? Give a specific example(s) of when you would use both of them?
+
+What's the trade-off between bias and variance?
+
+Which is more important to you: model accuracy or model performance?
