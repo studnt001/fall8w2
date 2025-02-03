@@ -1,0 +1,204 @@
+---
+title: "Discussion Week3"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+For the Discussion Activity this week we'll be working with the 2021 Pew Research Center's American Trends Panel Wave 82 Survey.The data was obtained [here] (https://www.pewresearch.org/american-trends-panel-datasets/)and also uploaded to the worldclass shell. The code used in this Demo was adopted from the tutorials located [here] (https://medium.com/pew-research-center-decoded/how-to-analyze-pew-research-center-survey-data-in-r-f326df360713) and 
+[here] (https://medium.com/pew-research-center-decoded/using-tidyverse-tools-with-pew-research-center-survey-data-in-r-bdfe61de0909).
+
+This will check if the survey package is installed. If not, it'll install it.
+```{r}
+if (!require(survey)) {
+  install.packages('survey')
+  require(survey)
+}
+```
+
+```{r}
+#another way to install packages
+#install.packages("survey")
+#install.packages(c("foreign", "knitr"))
+```
+
+```{r}
+
+library(foreign)
+library(survey)
+library(knitr)
+library(tidyverse)
+```
+
+Most of the Center's data files are in a spss format, but are easily converted to a .csv format to make it better to work with in R. Import the data set as an R data.frame
+
+```{r}
+atp<-read.spss("ATP W82.sav", to.data.frame = TRUE)
+names(atp) <- tolower(names(atp))
+```
+We can do some of our basic EDA analysis here.
+```{r}
+dim(atp)
+head(atp)
+summary(atp)
+```
+
+Use the table()function to see how factor variables are distributed.
+```{r}
+table(atp$f_gender)
+```
+The next step in analyzing the survey data is to use the svydesign () function from R’s “survey” package to create a survey design object. 
+We need to state the survey design to properly use survey weights and other design components for estimation.This will enable us to generalize to the overall U.S. population.
+
+```{r}
+w82_design = svydesign(
+  ids = ~0, #formula indicating there are no clusters  
+  data = atp,      #this is the dataset 
+  weights = ~weight_w82) #this is the 'weight' variable
+```
+After we've specified the survey design, you can obtain weighted estimates by using the svymean() function. The function enables us to compute weighted means, variances, and other useful statistics. Let's consider one of the questions asked in the survey that was asked in February of 2021:
+
+GAP21Q1_W82:Thinking about our economic situation, how would you describe the current economic situation in the U.S.?
+1- Very good
+2- Somewhat good
+3- Somewhat bad
+4- Very bad
+```{r}
+svymean(~gap21q1_w82,                    #variable to estimate
+         design =  w82_design #survey design object
+        )
+```
+We can use the full potential of a tidyverse package and combine two questions into one to gain greater insights about a topic. Question 29 asks respondents:What kind of leadership should the U.S. play in the world? It should...
+1- Be the single world leader
+2- Play a shared leadership role
+3 -Not play any leadership role
+
+Question 30 is posed if respondents chose "2- Play a shared leadership role": Should the U.S. be the most active of the leading nations, or should it be as active as other leading nations?
+1- Most active
+2- About as active
+
+We'll recode the values with the case_when() function which will capture a series of if-then statements and returns the value we specify based on whether our statement is met.
+```{r} 
+new21<-atp %>% 
+  mutate(us_leadership = case_when(
+    
+gap21q29_w82 == "Be the single world leader"~ "Single world leader", 
+gap21q29_w82 == "Play a shared leadership role" & gap21q30_w82== "Most active" ~ "More active than others",
+gap21q29_w82 == "Play a shared leadership role" & gap21q30_w82== "About as active" ~ "About as active",
+gap21q29_w82 == "Not play any leadership role"~"Not in a leadership role",
+gap21q29_w82 == "Refused"~"Refused"
+
+                                  ) #this parentheses closes call to   
+                                    #case_when and sends it to  
+                                    #fct_relevel with %>%    
+                                    %>% 
+ fct_relevel("Single world leader",
+             "More active than others",
+             "About as active",
+             "Not in a leadership role",                             
+             "Refused"                
+                ) #this parentheses closes our call to fct_relevel
+  ) #this parentheses closes our call to mutate
+```
+
+We can check that it works!
+```{r}
+table(new21$us_leadership, atp$gap21q29_w82)
+```
+
+Since we've built this variable, we can look at how some of the groups responded to this question. Let's check the categories of the education variable.
+
+
+```{r}
+levels(new21$f_educcat)
+```
+These categories look good (as the education variable was already modified by the Center). However, if you were to do it yourself you could use the c() function to let fct_collapse() the categories into a new category that you wish to declare.
+
+Since this is survey data and we are trying to generalize to the U.S. population, we need to use the survey weight variable provided in the data set. We can use select () function to only include variables that we need for our analysis and include the weight as well.
+
+
+```{r}
+sample21 <- new21 %>% 
+  select(id = qkey, 
+         weight_w82,
+         us_leadership, 
+        f_educcat, f_racecmb, f_agecat)
+```
+
+
+
+```{r}
+head(sample21)
+```
+
+```{r}
+library(data.table)
+setnames(sample21, old = c('f_educcat', 'f_racecmb', 'f_agecat'), new = c('education','race', 'age'))
+```
+
+Here we are going to convert the data set from the long format to a wide format. We'll use gather() to reaarange the data to compute weighted summary statistics by the demographic variables.We'll use education level, race, and age as our demographics.In the wide format, we have key/value columns. The key column is a subgroup variable and it identifies the demographic variable associated with that row.The value column is called the subgroup and represents the specific category of the demographic variable that the individual is in.
+```{r}
+sample21_long <- sample21 %>% 
+  gather(key = subgroup_variable, value = subgroup, 
+          education, race, age)
+```
+
+Here we are computing the weighted estimates of U.S. leadership question by the demographic variables we've identified. 
+```{r}
+us_leadership_estimates <- sample21_long %>% 
+  group_by(subgroup_variable, subgroup, us_leadership) %>% 
+#calculate the total number of people in each answer and education #category using survey weight
+  summarise(weighted_n = sum(weight_w82)) %>% 
+  #group by subgroup only to calculate subgroup category size
+  group_by(subgroup) %>%
+  #add columns for total group size and the proportion
+  mutate(weighted_group_size = sum(weighted_n),
+         weighted_estimate = weighted_n/weighted_group_size)
+
+
+```
+We'll drop the columns we don't need like so:
+```{r}
+us_leadership_estimates <- us_leadership_estimates %>% 
+  select(-weighted_n, -weighted_group_size)
+```
+
+See what we have:
+```{r}
+us_leadership_estimates
+```
+We can build a plot with ggplot () to better show individual attitudes towards the role of U.S. in the world. What do you observe based on these findings?
+
+```{r}
+us_leadership_estimates %>% 
+  filter(us_leadership != "Refused") %>% 
+  filter(!(subgroup %in% 
+                  c("Refused"))) %>% 
+  ggplot(
+    aes(
+      x = weighted_estimate,
+      y = subgroup
+    )
+  ) +
+  geom_point() + 
+  scale_x_continuous(limits = c(0, .8),
+                     breaks = seq(0, .6, by = .2),
+                     labels = scales::percent(
+                                seq(0, .6, by = .2), accuracy = 1)
+                     ) +
+  facet_grid(cols = vars(us_leadership),
+             rows = vars(subgroup_variable), 
+             scales = "free_y",
+             space = "free"
+             ) +
+  theme(plot.title = element_text(size=12)) +
+  theme(axis.title.y = element_blank())+
+  labs(title = 'Comparison of Survey Participants on the Role of U.S. in the World',subtitle = "Most people believe that U.S. should be about as active as other leading nations\n regardless of age, education or race")
+```
+
+Continue using this R file to look at the GAP21Q28 of the survey. What can you generalize to the U.S. population by the demographics? Post to the discussion thread that includes:
+* Choose at least 2 demographics to compare their response on this variable
+* Your plot(s) - try to label axis and title the plots.
+* R file
