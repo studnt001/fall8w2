@@ -1,0 +1,169 @@
+---
+title: "Lab Week3"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Sampling Simulation and practicing using the "for loop". Let's compute the mean of 3 of independently drawn samples. What are the values of the sample means? We set the seed to make sure our output is replicated each time it is run. We are going to randomly generate a normal distribution with mean of 5 and sd of 10.
+```{r}
+set.seed(1)
+#This is "pre-allocating" the first vector
+mu_x = c(NA, NA,NA)  
+x = rnorm(100, mean= 5, sd= 10)
+mu_x[1] = mean(x)
+mu_x 
+```
+Display what happened.
+[1] 6.088874       NA       NA
+
+Let's do the same for the second and third vectors.
+```{r}
+x <- rnorm(100, mean=5, sd = 10)
+mu_x[2] <- mean(x)
+x <- rnorm(100, mean=5, sd = 10)
+mu_x[3] <- mean(x)
+mu_x 
+```
+The above code is messy because it's redundant. It's best to use a for loop to do this at once.
+```{r}
+set.seed(1)
+mu_x_for = c(NA, NA, NA)
+for(i in 1:3){   ## tells R to do what is in brackets for i=1, i=2, i=3, and you can use i in here too.
+  x <- rnorm(100, mean=5, sd= 10)
+  mu_x_for[i] <- mean(x)
+}
+#These 2 objects will print the same values
+mu_x
+mu_x_for
+```
+
+Let's compute the mean of 300 samples.
+```{r}
+set.seed(1)
+mu_x = rep(NA, 300)   ## Repeats NA 300 times. The vector stores the calculated means in the for loop.
+for(i in 1:300){
+  x <- rnorm(100, mean=5, sd= 10)
+  mu_x[i] <- mean(x)
+  i
+}
+
+mu_x
+
+hist(mu_x)
+```
+
+Next exercise is largely conceptual, but serves as a foundation for understanding the concept of sampling within a population. We are going to take a really big sample comprising one million observations to approximate its true distribution. We'll then customize the plot with title and axis labels.This population approximates a normal distribution and we can draw the 68,95, 99.7 Rule on it. 
+```{r}
+set.seed(1)
+x_pop <- rnorm(1000000, mean=5, sd = 10)  
+hist(x_pop)             # Histogram
+plot(density(x_pop))    # Density Plot
+plot(density(x_pop), main = "Plot of Normal (mu = 5, sd = 10)")    # Give a custom title
+plot(density(x_pop), main = "Plot of Normal (mu = 5, sd = 10)", xlab = "X")    # Relabel the axis
+abline(h=0, lty="dotted")  # Give a gridline
+
+abline(v=-5, lty="dashed")    # one sd away
+abline(v=15, lty="dashed")
+
+abline(v=-15, col = "red", lty="dashed")   # two sd away
+abline(v=25, col="red", lty="dashed")
+
+abline(v=-25, col = "blue", lty="dashed")   # three sd away
+abline(v=35, col="blue", lty="dashed")
+```
+
+```{r}
+# Can "compute" the 68-95-99.7 Rule, too
+mean(x_pop > -5 & x_pop < 15)  
+mean(x_pop > -15 & x_pop < 25) 
+mean(x_pop > -25 & x_pop < 35)  
+
+```
+
+Instead of describing the population, let's take a sample from it. Next, let's overlay the 68-95-99.7 Rule from the population.
+```{r}
+set.seed(1)
+x_sample = sample(x_pop, size = 100, replace=TRUE)
+hist(x_sample)
+plot(density(x_sample), main="Plot of Sample from N(5,10)", xlab = "Sample Values")
+
+abline(h=0, lty="dotted")  ## Give a gridline
+
+abline(v=-5, lty="dashed")    ## one sd away
+abline(v=15, lty="dashed")
+
+abline(v=-15, col = "red", lty="dashed")   ## two sd away
+abline(v=25, col="red", lty="dashed")
+
+abline(v=-25, col = "blue", lty="dashed")   ## three sd away
+abline(v=35, col="blue", lty="dashed")
+```
+
+Here we'll calculate the 68-95-99.7 Rule.
+```{r}
+mean(x_sample > -5 & x_sample < 15)  # 68  is about .70
+mean(x_sample > -15 & x_sample < 25)  # 95 is about 98
+mean(x_sample > -25 & x_sample < 35)  # 99.7 is about 100
+```
+
+Point: The sample is not exact, but it is pretty close.
+```{r}
+mean(x_sample)  # The population mean is 7.46
+```
+ What if I took 5000 samples, and stored the mean of each sample, are the sample means different? Another way to do this is by extracting samples using rnorm () function by specifying the mean and sd.
+```{r}
+set.seed(1)
+x_bar = rep(NA, 5000)
+
+for(i in 1:5000){
+  x_sample = sample(x_pop, size = 100, replace=TRUE)
+  x_bar[i] = mean(x_sample)   
+}
+
+head(x_bar)
+```
+In repeated samples, calculated statistics have a distribution and we can compute the average of sample means, standard deviation and other statistics.
+```{r}
+hist(x_bar)
+plot(density(x_bar))
+```
+
+Average of the sample means is the population mean.
+```{r}
+mean(x_pop)
+mean(x_bar)
+```
+Standard deviation of the sample means is smaller than the population sd.
+```{r}
+sd(x_bar)
+sd(x_pop)
+```
+Standard deviation of the sample means is called the standard error. We need to divide population sd by square root of the sample size to get standard error.
+```{r}
+sd(x_pop)/sqrt(100)   
+sd(x_bar)
+```
+One more thing...What happens when the sample size goes up? We can plot sampling distributions of sample sizes: 10, 50, 100 and 3000 respectively. What does the shape of the distribution tell you?
+
+```{r}
+set.seed(1)
+sample_size = c(10, 50, 100, 3000)
+par(mfrow=c(3,2))
+for(samp in sample_size){
+  x_bar = rep(NA, 5000)
+  
+  for(i in 1:5000){
+    x_sample = rnorm(samp, mean = 5, sd = 10)
+    x_bar[i] = mean(x_sample)   
+  }
+  
+  plot(density(x_bar), main=paste("Distribution of X-bar for N = ", samp), xlim=c(0,10), xlab = "X_bar")
+  cat(mean(x_bar), "\n")
+}
+
+par(mfrow=c(1,1))
+```
+
+
